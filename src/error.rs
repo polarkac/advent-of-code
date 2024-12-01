@@ -6,7 +6,6 @@ pub enum Error {
     InvalidYear,
     ParseDay,
     InvalidDay,
-    InvalidDate,
 }
 
 impl std::fmt::Display for Error {
@@ -39,7 +38,6 @@ impl std::fmt::Display for Error {
             Self::InvalidDay => {
                 write!(f, "Day must be in range {} - {}.", Day::MIN, Day::MAX)
             }
-            Self::InvalidDate => write!(f, "Invalid date"),
         }
     }
 }

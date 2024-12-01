@@ -6,28 +6,17 @@ mod year15;
 mod year24;
 
 
-use crate::{error::Error, cli::Args, aoc::Aoc};
+use crate::{error::Error, cli::Args};
 
 fn main() -> Result<(), Error> {
     let args: Args = argh::from_env();
-    let aoc = match (args.year.as_u16(), args.day.as_u8()) {
-        (2015, 1) => {
-            Aoc::new(&args, Box::new(year15::day01::input))
-                .part(Box::new(year15::day01::part1))
-        },
-        (2024, 1) => {
-            Aoc::new(&args, Box::new(year24::day01::input))
-                .part(Box::new(year24::day01::part1))
-                .part(Box::new(year24::day01::part2))
-        }
-        _ => return Err(Error::InvalidDate),
+    let aoc = match args.year.as_u16() {
+        2015 => year15::build_aoc(&args),
+        2024 => year24::build_aoc(&args),
+        _ => return Err(Error::InvalidYear),
     };
 
-    if !args.bench {
-        aoc.run();
-    } else {
-        aoc.run_benchmarked();
-    }
+    aoc?.run();
 
     Ok(())
 }

@@ -29,7 +29,11 @@ impl<'a> Aoc<'a> {
 
     pub fn run(&self) {
         let input = (self.input)();
-        self.run_parts(input);
+        if !self.args.bench {
+            self.run_parts(input);
+        } else {
+            self.run_benchmarked();
+        }
     }
 
     pub fn run_benchmarked(&self) {
