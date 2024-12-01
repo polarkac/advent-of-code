@@ -3,6 +3,7 @@ mod error;
 mod cli;
 mod aoc;
 mod year15;
+mod year24;
 
 
 use crate::{error::Error, cli::Args, aoc::Aoc};
@@ -14,6 +15,11 @@ fn main() -> Result<(), Error> {
             Aoc::new(Box::new(year15::day01::input))
                 .part(Box::new(year15::day01::part1))
         },
+        (2024, 1) => {
+            Aoc::new(Box::new(year24::day01::input))
+                .part(Box::new(year24::day01::part1))
+                .part(Box::new(year24::day01::part2))
+        }
         _ => return Err(Error::InvalidDate),
     };
 
