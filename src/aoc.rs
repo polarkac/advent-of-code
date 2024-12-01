@@ -108,14 +108,49 @@ impl<'a> Aoc<'a> {
 }
 
 fn humanize_time(value: f64) -> String {
-    let units = ["s", "ms", "μs", "ns"];
-    let (mut value, mut unit) = (value, units[0]);
-    for (i, u) in units.iter().skip(1).enumerate() {
-        if value < 1.0 {
-            value = value * (1000.0 * (i + 1) as f64);
-            unit = u;
+    let units = [
+        ("s", 1e0),
+        ("ms", 1e3),
+        ("μs", 1e6),
+        ("ns", 1e9),
+    ];
+    let value = units.iter().find_map(|(u, v)| {
+        let new_value = value * v;
+        if new_value >= 1.0 {
+            Some((*u, new_value))
+        } else {
+            None
         }
+    }).unwrap_or(("s", value));
+
+    format!("{:.2} {}", value.1, value.0)
+}
+
+#[cfg(test)]
+mod test {
+    use super::humanize_time;
+
+    #[test]
+    fn test_nanoseconds() {
+        let time = 0.0000000013984;
+        assert_eq!(String::from("1.40 ns"), humanize_time(time));
     }
 
-    format!("{value:.2} {unit}")
+    #[test]
+    fn test_microseconds() {
+        let time = 0.0000082113984;
+        assert_eq!(String::from("8.21 μs"), humanize_time(time));
+    }
+
+    #[test]
+    fn test_miliseconds() {
+        let time = 0.0053342113984;
+        assert_eq!(String::from("5.33 ms"), humanize_time(time));
+    }
+
+    #[test]
+    fn test_seconds() {
+        let time = 12.23;
+        assert_eq!(String::from("12.23 s"), humanize_time(time));
+    }
 }
