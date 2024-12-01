@@ -1,4 +1,5 @@
 use std::time::{Duration, Instant};
+use yansi::Paint;
 
 use crate::cli::Args;
 
@@ -60,12 +61,14 @@ impl<'a> Aoc<'a> {
     }
 
     fn display_title(&self, part_num: usize) {
-        println!(
+        let title = format!(
             "= {}/{} - part {} ==",
             self.args.year.as_u16(),
             self.args.day.as_u8(),
             part_num
         );
+
+        println!("{}", title.bold());
     }
 
     fn display_benchmark_times(&self, part_times: Vec<Vec<Duration>>) {
@@ -81,12 +84,19 @@ impl<'a> Aoc<'a> {
                 .map(|d| d.as_secs_f64())
                 .max_by(|a, b| a.partial_cmp(b).unwrap())
                 .unwrap();
-            let avg = part.iter().map(|d| d.as_secs_f64()).sum::<f64>() / part.len() as f64;
-            println!("    Average:\t {}", humanize_time(avg));
+            let avg = part.iter().map(|d| d.as_secs_f64()).sum::<f64>()
+                / part.len() as f64;
+            println!(
+                "    {}:\t{}",
+                Paint::green("Average"),
+                Paint::green(&humanize_time(avg))
+            );
             let min_max = format!(
-                "    Min … Max:\t {} … {}",
-                humanize_time(min),
-                humanize_time(max)
+                "    {} … {}:\t{} … {}",
+                Paint::magenta("Min"),
+                Paint::cyan("Max"),
+                Paint::magenta(&humanize_time(min)),
+                Paint::cyan(&humanize_time(max))
             );
             if i != part_times.len() - 1 {
                 println!("{}\n", min_max);
