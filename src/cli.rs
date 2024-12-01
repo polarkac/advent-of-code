@@ -65,32 +65,3 @@ pub struct Args {
     #[argh(switch)]
     pub bench: bool,
 }
-
-/*
-impl Args {
-    pub fn run(&self) -> Result<(), Error> {
-        if !self.bench {
-            self.run_year()?;
-        } else {
-            let mut times = Vec::with_capacity(25);
-            while times.len() < 25 {
-                let instant = Instant::now();
-                self.run_year()?;
-                times.push((Instant::now() - instant).as_secs_f64());
-            }
-            for time in times {
-                println!("Time: {} μs", time * 1_000_000.0);
-            }
-        }
-
-        Ok(())
-    }
-
-    fn run_year(&self) -> Result<(), Error> {
-        match self.year.as_u16() {
-            2015 => year15::run_day(&self.day),
-            year => return Err(Error::YearNotStarted(year)),
-        }
-    }
-}
-*/
