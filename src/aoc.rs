@@ -64,7 +64,25 @@ impl Aoc {
                 .unwrap();
             let avg = part.iter().sum::<f64>() / part.len() as f64;
             println!("Min\tMax\tAvg");
-            println!("{min} s\t{max} s\t{avg} s");
+            println!(
+                "{}\t{}\t{}",
+                humanize_time(*min),
+                humanize_time(*max),
+                humanize_time(avg)
+            );
         }
     }
+}
+
+fn humanize_time(value: f64) -> String {
+    let units = ["s", "ms", "μs", "ns"];
+    let mut value = value;
+    for (i, unit) in units.iter().enumerate() {
+        if value > 1.0 {
+            return format!("{value} {}", unit);
+        }
+        value = value * (1000.0 * (i + 1) as f64);
+    }
+
+    format!("{value} s")
 }
