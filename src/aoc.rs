@@ -1,4 +1,4 @@
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use crate::cli::Args;
 
@@ -39,7 +39,7 @@ impl<'a> Aoc<'a> {
             while times.len() < 25 {
                 let time = Instant::now();
                 part(input);
-                times.push((Instant::now() - time).as_secs_f64());
+                times.push(time.elapsed());
             }
             part_times.push(times);
         }
@@ -68,23 +68,25 @@ impl<'a> Aoc<'a> {
         );
     }
 
-    fn display_benchmark_times(&self, part_times: Vec<Vec<f64>>) {
+    fn display_benchmark_times(&self, part_times: Vec<Vec<Duration>>) {
         for (i, part) in part_times.iter().enumerate() {
             self.display_title(i + 1);
             let min = part
                 .iter()
+                .map(|d| d.as_secs_f64())
                 .min_by(|a, b| a.partial_cmp(b).unwrap())
                 .unwrap();
             let max = part
                 .iter()
+                .map(|d| d.as_secs_f64())
                 .max_by(|a, b| a.partial_cmp(b).unwrap())
                 .unwrap();
-            let avg = part.iter().sum::<f64>() / part.len() as f64;
+            let avg = part.iter().map(|d| d.as_secs_f64()).sum::<f64>() / part.len() as f64;
             println!("    Average:\t {}", humanize_time(avg));
             let min_max = format!(
                 "    Min … Max:\t {} … {}",
-                humanize_time(*min),
-                humanize_time(*max)
+                humanize_time(min),
+                humanize_time(max)
             );
             if i != part_times.len() - 1 {
                 println!("{}\n", min_max);
@@ -97,13 +99,13 @@ impl<'a> Aoc<'a> {
 
 fn humanize_time(value: f64) -> String {
     let units = ["s", "ms", "μs", "ns"];
-    let mut value = value;
-    for (i, unit) in units.iter().enumerate() {
-        if value > 1.0 {
-            return format!("{value:.2} {}", unit);
+    let (mut value, mut unit) = (value, units[0]);
+    for (i, u) in units.iter().skip(1).enumerate() {
+        if value < 1.0 {
+            value = value * (1000.0 * (i + 1) as f64);
+            unit = u;
         }
-        value = value * (1000.0 * (i + 1) as f64);
     }
 
-    format!("{value:.2} s")
+    format!("{value:.2} {unit}")
 }
