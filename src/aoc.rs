@@ -1,16 +1,20 @@
 use std::time::Instant;
 
+use crate::cli::Args;
+
 type FnInput = Box<dyn Fn() -> &'static str>;
 type FnPart = Box<dyn Fn(&str) -> String>;
 
-pub struct Aoc {
+pub struct Aoc<'a> {
+    args: &'a Args,
     input: FnInput,
     parts: Vec<FnPart>,
 }
 
-impl Aoc {
-    pub fn new(input: FnInput) -> Self {
+impl<'a> Aoc<'a> {
+    pub fn new(args: &'a Args, input: FnInput) -> Self {
         Self {
+            args,
             input,
             parts: Vec::new(),
         }
@@ -40,20 +44,33 @@ impl Aoc {
             part_times.push(times);
         }
 
-        Self::display_benchmark_times(part_times);
+        self.display_benchmark_times(part_times);
     }
 
     fn run_parts(&self, input: &str) {
         for (i, part) in self.parts.iter().enumerate() {
-            println!("= Part {} =", i + 1);
+            self.display_title(i + 1);
             let result = part(input);
-            println!("{result}");
+            if i != self.parts.len() - 1 {
+                println!("{result}\n");
+            } else {
+                println!("{result}");
+            }
         }
     }
 
-    fn display_benchmark_times(part_times: Vec<Vec<f64>>) {
+    fn display_title(&self, part_num: usize) {
+        println!(
+            "= {}/{} - part {} ==",
+            self.args.year.as_u16(),
+            self.args.day.as_u8(),
+            part_num
+        );
+    }
+
+    fn display_benchmark_times(&self, part_times: Vec<Vec<f64>>) {
         for (i, part) in part_times.iter().enumerate() {
-            println!("= Part {} =", i + 1);
+            self.display_title(i + 1);
             let min = part
                 .iter()
                 .min_by(|a, b| a.partial_cmp(b).unwrap())
@@ -63,13 +80,17 @@ impl Aoc {
                 .max_by(|a, b| a.partial_cmp(b).unwrap())
                 .unwrap();
             let avg = part.iter().sum::<f64>() / part.len() as f64;
-            println!("Min\tMax\tAvg");
-            println!(
-                "{}\t{}\t{}",
+            println!("    Average:\t {}", humanize_time(avg));
+            let min_max = format!(
+                "    Min … Max:\t {} … {}",
                 humanize_time(*min),
-                humanize_time(*max),
-                humanize_time(avg)
+                humanize_time(*max)
             );
+            if i != part_times.len() - 1 {
+                println!("{}\n", min_max);
+            } else {
+                println!("{}", min_max);
+            }
         }
     }
 }
@@ -79,10 +100,10 @@ fn humanize_time(value: f64) -> String {
     let mut value = value;
     for (i, unit) in units.iter().enumerate() {
         if value > 1.0 {
-            return format!("{value} {}", unit);
+            return format!("{value:.2} {}", unit);
         }
         value = value * (1000.0 * (i + 1) as f64);
     }
 
-    format!("{value} s")
+    format!("{value:.2} s")
 }
