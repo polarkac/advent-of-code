@@ -53,8 +53,7 @@ fn is_safe_with_tolerance(report: &Vec<i64>) -> bool {
 
     if !is_report_safe {
         for i in 0..report.len() {
-            let mut new_report = report.clone();
-            new_report.remove(i);
+            let new_report = [&report[0..i], &report[i + 1..]].concat();
             if is_safe(&new_report) {
                 is_report_safe = true;
                 break;
