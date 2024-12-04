@@ -25,6 +25,7 @@ pub fn build_aoc(args: &Args) -> Result<Aoc<'_>, Error> {
         4 => Ok(
             Aoc::new(args, Box::new(day04::input))
                 .part(Box::new(day04::part1))
+                .part(Box::new(day04::part2))
         ),
         _ => Err(Error::InvalidDay),
     }

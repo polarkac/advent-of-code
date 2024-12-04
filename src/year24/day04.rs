@@ -25,6 +25,75 @@ pub fn part1(input: &str) -> String {
     total.to_string()
 }
 
+pub fn part2(input: &str) -> String {
+    let chars: Vec<Vec<char>> = input
+        .lines()
+        .map(|l| l.trim())
+        .filter(|l| !l.is_empty())
+        .map(|l| l.chars().collect())
+        .collect();
+
+    let mut total: u64 = 0;
+    for (y, row) in chars.iter().enumerate() {
+        for (x, col) in row.iter().enumerate() {
+            if col == &'A' {
+                if try_x_for_mas(&chars, (y, x)) {
+                    total += 1;
+                }
+            }
+        }
+    }
+
+    total.to_string()
+}
+
+fn try_x_for_mas(chars: &Vec<Vec<char>>, pos: (usize, usize)) -> bool {
+    if pos.0 < 1
+        || pos.0 > chars.len() - 1
+        || pos.1 < 1
+        || pos.1 > chars[0].len() - 1
+    {
+        return false;
+    }
+    let diag_left_pos = [
+        (pos.0.saturating_sub(1), pos.1.saturating_sub(1)),
+        (pos.0, pos.1),
+        (pos.0.saturating_add(1), pos.1.saturating_add(1)),
+    ];
+    let diag_right_pos = [
+        (pos.0.saturating_sub(1), pos.1.saturating_add(1)),
+        (pos.0, pos.1),
+        (pos.0.saturating_add(1), pos.1.saturating_sub(1)),
+    ];
+
+    let mut diag_left = Vec::new();
+    for pos in diag_left_pos {
+        let word = chars.get(pos.0).map(|row| row.get(pos.1)).flatten();
+        if let Some(c) = word {
+            diag_left.push(c);
+        }
+    }
+    let mut diag_right = Vec::new();
+    for pos in diag_right_pos {
+        let word = chars.get(pos.0).map(|row| row.get(pos.1)).flatten();
+        if let Some(c) = word {
+            diag_right.push(c);
+        }
+    }
+    if diag_left.len() == 3 && diag_right.len() == 3 {
+        let diag_left = String::from_iter(diag_left);
+        let diag_right = String::from_iter(diag_right);
+
+        if (diag_left.as_str() == "MAS" || diag_left.as_str() == "SAM")
+            && (diag_right.as_str() == "MAS" || diag_right.as_str() == "SAM")
+        {
+            return true;
+        }
+    }
+
+    false
+}
+
 fn try_all_directions(chars: &Vec<Vec<char>>, pos: (usize, usize)) -> u64 {
     let mut count = 0;
     let lr_range = pos.1..=pos.1 + 3;
@@ -194,7 +263,7 @@ fn check_diagonal_down_rl(
 
 #[cfg(test)]
 mod test {
-    use crate::year24::day04::part1;
+    use crate::year24::day04::{part1, part2};
 
     #[test]
     fn test_preview_part1() {
@@ -211,5 +280,22 @@ mod test {
             MXMXAXMASX
             ";
         assert_eq!("18", part1(input_preview));
+    }
+
+    #[test]
+    fn test_preview_part2() {
+        let input_preview = "
+            MMMSXXMASM
+            MSAMXMSMSA
+            AMXSXMAAMM
+            MSAMASMSMX
+            XMASAMXAMM
+            XXAMMXXAMA
+            SMSMSASXSS
+            SAXAMASAAA
+            MAMMMXMMMM
+            MXMXAXMASX
+            ";
+        assert_eq!("9", part2(input_preview));
     }
 }
