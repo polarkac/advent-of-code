@@ -18,7 +18,17 @@ pub fn part1(input: &str) -> String {
 }
 
 pub fn part2(input: &str) -> String {
-    String::new()
+    let (rules, updates) = parse_input(input);
+    let mut total: u64 = 0;
+    for update in updates {
+        if !is_update_valid(&rules, &update) {
+            let corrected_update = correct_update(&rules, &update);
+            let half_len = corrected_update.len() / 2;
+            total += corrected_update[half_len] as u64;
+        }
+    }
+
+    total.to_string()
 }
 
 fn parse_input(input: &str) -> (Vec<(u8, u8)>, Vec<Vec<u8>>) {
@@ -71,6 +81,36 @@ fn is_update_valid(rules: &[(u8, u8)], update: &[u8]) -> bool {
     }
 
     true
+}
+
+fn correct_update(rules: &[(u8, u8)], update: &[u8]) -> Vec<u8> {
+    let selected_rules: Vec<&(u8, u8)> = rules
+        .iter()
+        .filter(|rule| (update.contains(&rule.0) && update.contains(&rule.1)))
+        .collect();
+
+    let mut update = update.to_vec();
+    loop {
+        let mut counter = 0;
+        for rule in &selected_rules {
+            let prev_idx = update.iter().position(|v| *v == rule.0);
+            let next_idx = update.iter().position(|v| *v == rule.1);
+
+            if let (Some(prev_idx), Some(next_idx)) = (prev_idx, next_idx) {
+                if prev_idx > next_idx {
+                    update.swap(prev_idx, next_idx);
+                } else {
+                    counter += 1;
+                }
+            }
+        }
+
+        if counter == selected_rules.len() {
+            break;
+        }
+    }
+
+    update
 }
 
 #[cfg(test)]
