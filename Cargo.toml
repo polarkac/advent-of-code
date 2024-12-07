@@ -4,5 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+itertools = { version = "0.13" }
 argh = { version = "0.1.12" }
 yansi = { version = "1.0" }
