@@ -1,4 +1,7 @@
-use std::{collections::{HashMap, HashSet}, fmt::Display};
+use std::{
+    collections::{HashMap, HashSet},
+    fmt::Display,
+};
 
 use crate::include_input;
 
@@ -8,8 +11,29 @@ pub fn input() -> &'static str {
 
 pub fn part1(input: &str) -> String {
     let map = HeightMap::from_input(input);
+    let total: usize = map
+        .count_reachable_tops()
+        .iter()
+        .map(|(_, tops)| {
+            let mut set: HashSet<(usize, usize)> = HashSet::new();
+            set.extend(tops);
 
-    map.count_reachable_tops().to_string()
+            set.len()
+        })
+        .sum();
+
+    total.to_string()
+}
+
+pub fn part2(input: &str) -> String {
+    let map = HeightMap::from_input(input);
+    let total: usize = map
+        .count_reachable_tops()
+        .iter()
+        .map(|(_, tops)| tops.len())
+        .sum();
+
+    total.to_string()
 }
 
 struct HeightMap {
@@ -45,20 +69,22 @@ impl HeightMap {
         Self { map, trail_heads }
     }
 
-    fn count_reachable_tops(&self) -> usize {
+    fn count_reachable_tops(
+        &self,
+    ) -> HashMap<(usize, usize), Vec<(usize, usize)>> {
         let mut visited_tops = HashMap::new();
         for head in &self.trail_heads {
             visited_tops.insert(*head, self.try_reach_top(*head));
         }
 
-        visited_tops.iter().map(|(_, tops)| tops.len()).sum()
+        visited_tops
     }
 
-    fn try_reach_top(&self, head: (usize, usize)) -> HashSet<(usize, usize)> {
-        let mut set = HashSet::new();
+    fn try_reach_top(&self, head: (usize, usize)) -> Vec<(usize, usize)> {
+        let mut set = Vec::new();
         let current_height = self.map[head.0][head.1];
         if current_height == 9 {
-            set.insert((head.0, head.1));
+            set.push((head.0, head.1));
 
             return set;
         }
