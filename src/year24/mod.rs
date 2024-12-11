@@ -10,6 +10,7 @@ mod day07;
 mod day08;
 mod day09;
 mod day10;
+mod day11;
 
 pub fn build_aoc(args: &Args) -> Result<Aoc<'_>, Error> {
     match args.day.as_u8() {
@@ -47,6 +48,11 @@ pub fn build_aoc(args: &Args) -> Result<Aoc<'_>, Error> {
             Ok(Aoc::new(args, Box::new(day10::input))
                 .part(Box::new(day10::part1))
                 .part(Box::new(day10::part2)))
+        }
+        11 => {
+            Ok(Aoc::new(args, Box::new(day11::input))
+                .part(Box::new(day11::part1))
+                .part(Box::new(day11::part2)))
         }
         _ => Err(Error::InvalidDay),
     }
