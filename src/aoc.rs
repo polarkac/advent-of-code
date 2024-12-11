@@ -90,17 +90,24 @@ impl<'a> Aoc<'a> {
                 .unwrap();
             let avg = part.iter().map(|d| d.as_secs_f64()).sum::<f64>()
                 / part.len() as f64;
+            let std_deviation = (part
+                .iter()
+                .map(|d| (d.as_secs_f64() - avg).powi(2))
+                .sum::<f64>()
+                / part.len() as f64)
+                .sqrt();
             println!(
-                "    {}:\t{}",
+                "\t{}:\t{} ± {}",
                 Paint::green("Average"),
-                Paint::green(&humanize_time(avg))
+                Paint::green(&humanize_time(avg)),
+                Paint::green(&humanize_time(std_deviation)),
             );
             let min_max = format!(
-                "    {} … {}:\t{} … {}",
+                "\t{} … {}:\t{} … {}",
                 Paint::magenta("Min"),
                 Paint::cyan("Max"),
                 Paint::magenta(&humanize_time(min)),
-                Paint::cyan(&humanize_time(max))
+                Paint::cyan(&humanize_time(max)),
             );
             if i != part_times.len() - 1 {
                 println!("{}\n", min_max);
@@ -117,15 +124,19 @@ fn humanize_time(value: f64) -> String {
         ("ms", 1e3),
         ("μs", 1e6),
         ("ns", 1e9),
+        ("ps", 1e12),
     ];
-    let value = units.iter().find_map(|(u, v)| {
-        let new_value = value * v;
-        if new_value >= 1.0 {
-            Some((*u, new_value))
-        } else {
-            None
-        }
-    }).unwrap_or(("s", value));
+    let value = units
+        .iter()
+        .find_map(|(u, v)| {
+            let new_value = value * v;
+            if new_value >= 1.0 {
+                Some((*u, new_value))
+            } else {
+                None
+            }
+        })
+        .unwrap_or(("s", value));
 
     format!("{:.2} {}", value.1, value.0)
 }
