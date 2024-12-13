@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::include_input;
 
 pub fn input() -> &'static str {
@@ -16,37 +18,43 @@ pub fn part2(input: &str) -> String {
     stone_blinks(stones, 75).to_string()
 }
 
-fn stone_blinks(mut stones: Vec<Stone>, blinks: u8) -> usize {
+fn stone_blinks(mut stones: HashMap<Stone, u64>, blinks: u8) -> u64 {
     for _ in 0..blinks {
-        let mut stone_counter = 0;
-        while stone_counter != stones.len() {
-            let stone = stones.remove(stone_counter);
-            let new_stones = stone.apply_rules();
-            let new_stones_count = new_stones.len();
-            for (ni, nstone) in new_stones.into_iter().enumerate() {
-                stones.insert(stone_counter + ni, nstone);
+        let mut new_stones = HashMap::new();
+        for (stone, counter) in &stones {
+            let ruled_stones = stone.apply_rules();
+            for ruled_stone in ruled_stones {
+                new_stones
+                    .entry(ruled_stone)
+                    .and_modify(|c| *c += 1 * counter)
+                    .or_insert(1 * counter);
             }
-            stone_counter += new_stones_count;
         }
+        stones = new_stones;
     }
 
-    stones.len()
+    stones.into_iter().fold(0_u64, |mut acc, (_, counter)| {
+        acc += counter;
+        acc
+    })
 }
 
-fn parse_input(input: &str) -> Vec<Stone> {
-    input.split(" ").fold(Vec::new(), |mut acc, value| {
-        let number = value.trim().parse().unwrap();
-        acc.push(Stone(number));
+fn parse_input(input: &str) -> HashMap<Stone, u64> {
+    input.split(" ").fold(HashMap::new(), |mut acc, value| {
+        let number = Stone(value.trim().parse().unwrap());
+        acc.entry(number)
+            .and_modify(|counter| *counter += 1)
+            .or_insert(1);
 
         acc
     })
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Hash, Debug, PartialEq, Eq)]
 struct Stone(u64);
 
 impl Stone {
-    fn apply_rules(self) -> Vec<Self> {
+    fn apply_rules(&self) -> Vec<Self> {
         let default_value = self.0 * 2024;
         if self.0 == 0 {
             return vec![Stone(1)];
@@ -58,7 +66,7 @@ impl Stone {
         vec![Stone(default_value)]
     }
 
-    fn try_split(self) -> Option<Vec<Self>> {
+    fn try_split(&self) -> Option<Vec<Self>> {
         let digit_count = ((self.0 as f64).log10().floor() + 1.0) as u64;
         if digit_count % 2 != 0 {
             return None;
